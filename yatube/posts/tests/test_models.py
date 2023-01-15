@@ -6,6 +6,7 @@ from ..models import Group, Post
 User = get_user_model()
 FIRST_SYMBOLS = 15
 
+
 class PostModelTest(TestCase):
     @classmethod
     def setUpClass(cls):
