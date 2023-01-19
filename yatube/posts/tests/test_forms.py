@@ -1,12 +1,8 @@
-from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
-from ..forms import PostForm
-from ..models import Post, Group
 from http import HTTPStatus
-
-
-User = get_user_model()
+from posts.forms import PostForm
+from posts.models import Group, Post, User
 
 
 class PostFormTests(TestCase):
@@ -27,7 +23,7 @@ class PostFormTests(TestCase):
         cls.form = PostForm()
 
     def setUp(self):
-        # Создаем авторизованный клиент
+        self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -73,3 +69,16 @@ class PostFormTests(TestCase):
         self.assertEqual(Post.objects.count(), post_count)
         self.assertEqual(edit_object.text, 'Измененный текст')
         self.assertEqual(edit_object.author, self.user)
+
+    def test_pos_creaste_guest(self):
+        post_count = Post.objects.count()
+        form_data = {
+            'text': 'Тестовый текст',
+            'group': self.group.id
+        }
+        self.guest_client.post(
+            reverse('posts:post_create'),
+            data=form_data,
+            follow=True
+        )
+        self.assertEqual(Post.objects.count(), post_count)

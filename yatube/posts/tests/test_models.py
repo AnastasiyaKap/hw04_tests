@@ -1,9 +1,7 @@
-from django.contrib.auth import get_user_model
 from django.test import TestCase
+from posts.models import Group, Post, User
 
-from ..models import Group, Post
 
-User = get_user_model()
 FIRST_SYMBOLS = 15
 
 
@@ -30,3 +28,15 @@ class PostModelTest(TestCase):
         group = PostModelTest.group
         expected_object_name_group = group.title
         self.assertEqual(expected_object_name_group, str(group))
+
+    def test_verbose_name(self):
+        """verbose_name в полях совпадает с ожидаемым."""
+        post = PostModelTest.post
+        field_verboses = {
+            'text': 'Текст поста',
+            'group': 'Группа',
+        }
+        for field, expected_value in field_verboses.items():
+            with self.subTest(field=field):
+                self.assertEqual(
+                    post._meta.get_field(field).verbose_name, expected_value)

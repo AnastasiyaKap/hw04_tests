@@ -1,11 +1,8 @@
-from django.contrib.auth import get_user_model
+from django import forms
 from django.test import Client, TestCase
 from django.urls import reverse
-from django.core.cache import cache
-from ..models import Group, Post
-from django import forms
+from posts.models import Group, Post, User
 
-User = get_user_model()
 
 NUMBERS_PAGES_FIRST = 10
 
@@ -51,7 +48,7 @@ class PostPagesTests(TestCase):
                 'posts:post_detail',
                 kwargs={'post_id': self.post.id}
             ): 'posts/post_detail.html',
-            reverse('posts:post_create'): "posts/create_post.html",
+            reverse('posts:post_create'): 'posts/create_post.html',
             reverse(
                 'posts:profile',
                 kwargs={'username': self.user.username},
@@ -156,7 +153,6 @@ class PostPagesTests(TestCase):
         self.assertEqual(post_group_0, create_new_post.group)
         # Делаем проверку, что пост
         # попал на страницу группы
-        cache.clear()
         response = self.authorized_client.get(
             reverse(
                 'posts:group_list',
@@ -170,7 +166,6 @@ class PostPagesTests(TestCase):
         self.assertEqual(post_id_0, create_new_post.id)
         # Делаем проверку, что пост
         # попал на страницу профайла
-        cache.clear()
         response = self.authorized_client.get(
             reverse(
                 'posts:profile',
@@ -236,20 +231,20 @@ class PaginatorViewsTest(TestCase):
 
     def test_second_page_contains_three_records(self):
         # Проверка: на второй странице должно быть три поста.
-        response = self.client.get(reverse('posts:index') + '?page=2')
+        response = self.client.get(reverse('posts:index'), {'page': 2})
         self.assertEqual(len(response.context.get('page_obj')),
                          NUMBERS_PAGES_SECOND)
 
         response2 = self.authorized_client.get(
-            reverse('posts:group_list', kwargs={'slug': self.group.slug})
-            + '?page=2'
+            reverse('posts:group_list', kwargs={'slug': self.group.slug}),
+            {'page': 2}
         )
         self.assertEqual(len(response2.context.get('page_obj')),
                          NUMBERS_PAGES_SECOND)
 
         response3 = self.authorized_client.get(
-            reverse('posts:profile', kwargs={'username': self.user.username})
-            + '?page=2'
+            reverse('posts:profile', kwargs={'username': self.user.username}),
+            {'page': 2}
         )
         self.assertEqual(len(response3.context.get('page_obj')),
                          NUMBERS_PAGES_SECOND)

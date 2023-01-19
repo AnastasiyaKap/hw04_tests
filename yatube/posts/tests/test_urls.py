@@ -1,10 +1,8 @@
-from http import HTTPStatus
-from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import Client, TestCase
-from ..models import Group, Post
-
-User = get_user_model()
+from django.urls import reverse
+from http import HTTPStatus
+from posts.models import Group, Post, User
 
 
 class PostURLTests(TestCase):
@@ -31,12 +29,24 @@ class PostURLTests(TestCase):
     def test_urls_uses_template(self):
         """URL-адрес использует соответствующий шаблон."""
         templates_url_names = {
-            "/": "posts/index.html",
-            f"/group/{PostURLTests.group.slug}/": "posts/group_list.html",
-            f"/profile/{self.user}/": "posts/profile.html",
-            f"/posts/{int(self.post.pk)}/": "posts/post_detail.html",
-            f"/posts/{int(self.post.pk)}/edit/": "posts/create_post.html",
-            "/create/": "posts/create_post.html",
+            reverse('posts:index'): "posts/index.html",
+            reverse(
+                'posts:group_list',
+                kwargs={'slug': self.group.slug},
+            ): 'posts/group_list.html',
+            reverse(
+                'posts:profile',
+                kwargs={'username': self.user.username},
+            ): 'posts/profile.html',
+            reverse(
+                'posts:post_detail',
+                kwargs={'post_id': self.post.id}
+            ): 'posts/post_detail.html',
+            reverse(
+                'posts:post_edit',
+                kwargs={'post_id': self.post.id}
+            ): 'posts/create_post.html',
+            reverse('posts:post_create'): 'posts/create_post.html',
         }
         for address, template in templates_url_names.items():
             with self.subTest(address=address):
@@ -46,13 +56,25 @@ class PostURLTests(TestCase):
     def test_urls_uses_guest(self):
         """URL-адрес доступен любому пользователю."""
         code_answer_for_users = {
-            "/": HTTPStatus.OK,
-            f"/group/{PostURLTests.group.slug}/": HTTPStatus.OK,
-            f"/profile/{self.user}/": HTTPStatus.OK,
-            f"/posts/{int(self.post.pk)}/": HTTPStatus.OK,
-            f"/posts/{int(self.post.pk)}/edit/": HTTPStatus.FOUND,
-            "/create/": HTTPStatus.FOUND,
-            "/unexisting_page/": HTTPStatus.NOT_FOUND,
+            reverse('posts:index'): HTTPStatus.OK,
+            reverse(
+                'posts:group_list',
+                kwargs={'slug': self.group.slug},
+            ): HTTPStatus.OK,
+            reverse(
+                'posts:profile',
+                kwargs={'username': self.user.username},
+            ): HTTPStatus.OK,
+            reverse(
+                'posts:post_detail',
+                kwargs={'post_id': self.post.id}
+            ): HTTPStatus.OK,
+            reverse(
+                'posts:post_edit',
+                kwargs={'post_id': self.post.id}
+            ): HTTPStatus.FOUND,
+            reverse('posts:post_create'): HTTPStatus.FOUND,
+            '/unexisting_page/': HTTPStatus.NOT_FOUND,
         }
         for address, code in code_answer_for_users.items():
             with self.subTest(address=address):
@@ -63,13 +85,25 @@ class PostURLTests(TestCase):
     def test_urls_uses_auth_author(self):
         """URL-адрес доступен зарегистрированному пользователю."""
         code_answer_for_users = {
-            "/": HTTPStatus.OK,
-            f"/group/{PostURLTests.group.slug}/": HTTPStatus.OK,
-            f"/profile/{self.user}/": HTTPStatus.OK,
-            f"/posts/{int(self.post.pk)}/": HTTPStatus.OK,
-            f"/posts/{int(self.post.pk)}/edit/": HTTPStatus.OK,
-            "/create/": HTTPStatus.OK,
-            "/unexisting_page/": HTTPStatus.NOT_FOUND,
+            reverse('posts:index'): HTTPStatus.OK,
+            reverse(
+                'posts:group_list',
+                kwargs={'slug': self.group.slug},
+            ): HTTPStatus.OK,
+            reverse(
+                'posts:profile',
+                kwargs={'username': self.user.username},
+            ): HTTPStatus.OK,
+            reverse(
+                'posts:post_detail',
+                kwargs={'post_id': self.post.id}
+            ): HTTPStatus.OK,
+            reverse(
+                'posts:post_edit',
+                kwargs={'post_id': self.post.id}
+            ): HTTPStatus.OK,
+            reverse('posts:post_create'): HTTPStatus.OK,
+            '/unexisting_page/': HTTPStatus.NOT_FOUND,
         }
         for address, code in code_answer_for_users.items():
             with self.subTest(address=address):
@@ -80,13 +114,25 @@ class PostURLTests(TestCase):
     def test_urls_uses_auth_edit(self):
         """URL-адрес редактирования доступен автору."""
         code_answer_for_users = {
-            "/": HTTPStatus.OK,
-            f"/group/{PostURLTests.group.slug}/": HTTPStatus.OK,
-            f"/profile/{self.user}/": HTTPStatus.OK,
-            f"/posts/{int(self.post.pk)}/": HTTPStatus.OK,
-            f"/posts/{int(self.post.pk)}/edit/": HTTPStatus.OK,
-            "/create/": HTTPStatus.OK,
-            "/unexisting_page/": HTTPStatus.NOT_FOUND,
+            reverse('posts:index'): HTTPStatus.OK,
+            reverse(
+                'posts:group_list',
+                kwargs={'slug': self.group.slug},
+            ): HTTPStatus.OK,
+            reverse(
+                'posts:profile',
+                kwargs={'username': self.user.username},
+            ): HTTPStatus.OK,
+            reverse(
+                'posts:post_detail',
+                kwargs={'post_id': self.post.id}
+            ): HTTPStatus.OK,
+            reverse(
+                'posts:post_edit',
+                kwargs={'post_id': self.post.id}
+            ): HTTPStatus.OK,
+            reverse('posts:post_create'): HTTPStatus.OK,
+            '/unexisting_page/': HTTPStatus.NOT_FOUND,
         }
         for address, code in code_answer_for_users.items():
             with self.subTest(address=address):
